@@ -1,0 +1,16 @@
+{
+  "name": "my-dsa-2026-capstone-project",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "demo": "node scripts/demo.js",
+    "benchmark": "node scripts/benchmark-lookup.js"
+  }
+}
