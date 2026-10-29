@@ -277,8 +277,15 @@ export function joinWaitlist(store, eventId, tierId, attendeeName) {
   const tier = findTier(event, tierId);
   const validatedAttendeeName = requireNonEmptyString(attendeeName, 'Attendee name');
 
-  if (tier.seatsLeft > 0) {
-    throw new DomainError('NOT_SOLD_OUT', 'Join the waitlist only when the tier is sold out.');
+  const hasActiveBooking = [...store.bookingsByReference.values()].some((booking) => (
+    booking.eventId === eventId
+    && booking.tierId === tierId
+    && booking.attendeeName === validatedAttendeeName
+    && booking.status !== 'cancelled'
+  ));
+
+  if (tier.seatsLeft > 0 || hasActiveBooking) {
+    throw new DomainError('NOT_SOLD_OUT', 'Join the waitlist only when the tier is sold out and the attendee does not already have a valid booking.');
   }
 
   const entry = {
