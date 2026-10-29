@@ -154,6 +154,52 @@ export function addTier(store, eventId, details = {}) {
   return tier;
 }
 
+export function publishEvent(store, eventId) {
+  requireStore(store);
+  const event = findEvent(store, eventId);
+
+  if (event.tiers.size === 0) {
+    throw new DomainError('INVALID_STATE', 'An event must have at least one ticket tier before it can be published.');
+  }
+
+  event.published = true;
+  return event;
+}
+
+export function unpublishEvent(store, eventId) {
+  requireStore(store);
+  const event = findEvent(store, eventId);
+  event.published = false;
+  return event;
+}
+
+export function listEventSummaries(store, { publishedOnly = true } = {}) {
+  requireStore(store);
+
+  if (typeof publishedOnly !== 'boolean') {
+    invalid('publishedOnly must be a boolean.');
+  }
+
+  return [...store.events.values()]
+    .filter((event) => !publishedOnly || event.published)
+    .map((event) => ({
+      id: event.id,
+      title: event.title,
+      city: event.city,
+      venue: event.venue,
+      date: event.date,
+      published: event.published,
+      tiers: [...event.tiers.values()].map((tier) => ({
+        id: tier.id,
+        name: tier.name,
+        priceCents: tier.priceCents,
+        capacity: tier.capacity,
+        sold: tier.sold,
+        seatsLeft: tier.seatsLeft,
+      })),
+    }));
+}
+
 export function bookTickets(store, eventId, tierId, attendeeName, quantity) {
   requireStore(store);
   const event = findEvent(store, eventId);

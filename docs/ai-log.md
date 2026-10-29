@@ -13,9 +13,9 @@ Every time you give an AI tool a significant prompt, add an entry. Three lines e
 ## Build 2
 
 ### Prompt 1: Build 2 prompt (docs/build-2.md)
-- **What I asked:**
-- **What came back:**
-- **What was wrong (or "nothing"):**
+- **What I asked:** Add stable merge sort, event publishing and summaries, pure event search/filter/sort, and acceptance-criteria tests for S02-S06; add `npm test`.
+- **What came back:** Added the domain functions, tests, and test script; added three explicit S04 publishing criteria.
+- **What was wrong (or "nothing"):** S04's criteria section was blank despite the prompt asking for tests against criteria written in class. I documented criteria matching the requested publish/unpublish behavior and the required no-tier `INVALID_STATE` rule. No implementation rule remained unclear.
 
 ### Prompt 2:
 - **What I asked:**
