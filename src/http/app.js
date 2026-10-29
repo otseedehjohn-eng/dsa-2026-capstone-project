@@ -29,8 +29,11 @@ function sendError(response, statusCode, code, message) {
 
 function statusForError(error) {
   if (error instanceof DomainError) {
-    if (error.code === 'BAD_REQUEST') return 400;
+    if (error.code === 'UNAUTHENTICATED') return 401;
+    if (error.code === 'FORBIDDEN') return 403;
+    if (error.code === 'PAYMENT_DECLINED') return 402;
     if (error.code === 'NOT_FOUND') return 404;
+    if (error.code === 'INVALID_STATE' || error.code === 'INVALID_TRANSITION' || error.code === 'SOLD_OUT') return 409;
     return 400;
   }
   return 500;
@@ -100,9 +103,10 @@ async function serveStatic(pathname, response) {
   response.end(file);
 }
 
-export function createApp() {
+export function createApp({ configureRouter } = {}) {
   const router = createRouter();
   router.add('GET', '/health', () => ({ status: 'ok' }));
+  configureRouter?.(router);
 
   return createServer(async (request, response) => {
     try {
@@ -119,7 +123,7 @@ export function createApp() {
           body,
         });
         if (!response.writableEnded) {
-          sendJson(response, 200, result);
+          sendJson(response, response.statusCode, result);
         }
         return;
       }
