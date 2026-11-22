@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#183c35">
+    <title>My tickets · Gather</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script type="module" src="/js/pages/tickets.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="Gather home">Gather<span>.</span></a>
+      <nav class="site-nav" aria-label="Account">
+        <a href="/">Browse events</a>
+        <a href="/organizer.html">Organizer</a>
+        <a href="/login.html">Sign in</a>
+      </nav>
+    </header>
+    <main class="page-shell dashboard-shell">
+      <a class="back-link" href="/">← All events</a>
+      <section class="dashboard-intro">
+        <p class="eyebrow">Your Gather account</p>
+        <h1 class="event-page-title">My tickets</h1>
+        <p class="event-venue">Your bookings, all in one place.</p>
+      </section>
+      <p id="tickets-status" class="results-status" role="status" aria-live="polite">Loading your tickets…</p>
+      <div id="tickets-list" class="ticket-grid"></div>
+    </main>
+    <footer class="site-footer">
+      <span>Gather<span class="brand-dot">.</span></span>
+      <span>Your booking details are private to your account.</span>
+    </footer>
+  </body>
+</html>

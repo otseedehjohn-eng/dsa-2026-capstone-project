@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#183c35">
+    <title>Sign in or create an account · Gather</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script type="module" src="/js/pages/login.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="Gather home">Gather<span>.</span></a>
+      <a class="header-link" href="/">Browse events <span aria-hidden="true">→</span></a>
+    </header>
+    <main class="page-shell auth-shell">
+      <a class="back-link" href="/">← All events</a>
+      <section class="auth-intro">
+        <p class="eyebrow">Welcome to Gather</p>
+        <h1 class="event-page-title">Your next experience<br>starts here.</h1>
+        <p class="event-venue">Sign in to manage your tickets, or create an account to get started.</p>
+      </section>
+      <div class="auth-grid">
+        <form id="login-form" class="auth-card">
+          <p class="eyebrow">Good to see you</p>
+          <h2>Sign in</h2>
+          <div class="field">
+            <label for="login-email">Email address</label>
+            <input id="login-email" name="email" type="email" autocomplete="email" required>
+          </div>
+          <div class="field">
+            <label for="login-password">Password</label>
+            <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+          </div>
+          <button class="button button-dark" type="submit">Sign in</button>
+          <p id="login-status" class="form-status" role="status" aria-live="polite"></p>
+        </form>
+
+        <form id="signup-form" class="auth-card">
+          <p class="eyebrow">Join the community</p>
+          <h2>Create account</h2>
+          <div class="field">
+            <label for="signup-email">Email address</label>
+            <input id="signup-email" name="email" type="email" autocomplete="email" required>
+          </div>
+          <div class="field">
+            <label for="signup-password">Password · at least 8 characters</label>
+            <input id="signup-password" name="password" type="password" autocomplete="new-password" minlength="8" required>
+          </div>
+          <div class="field">
+            <label for="signup-role">Account type</label>
+            <select id="signup-role" name="role" required>
+              <option value="attendee">Attendee</option>
+              <option value="organizer">Organizer</option>
+              <option value="staff">Staff</option>
+            </select>
+          </div>
+          <button class="button button-green" type="submit">Create account</button>
+          <p id="signup-status" class="form-status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </main>
+    <footer class="site-footer">
+      <span>Gather<span class="brand-dot">.</span></span>
+      <span>Your password is never shown or stored in your browser session.</span>
+    </footer>
+  </body>
+</html>

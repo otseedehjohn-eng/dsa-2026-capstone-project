@@ -8,7 +8,7 @@ import { assertTransition } from '../domain/bookingStateMachine.js';
 
 function requireUserId(userId) {
   if (typeof userId !== 'string' || userId.trim() === '') {
-    throw new DomainError('UNAUTHENTICATED', 'The x-user-id header is required.');
+    throw new DomainError('UNAUTHENTICATED', 'A valid user id is required.');
   }
   return userId.trim();
 }
@@ -28,6 +28,21 @@ function storeFor(event, bookings = [], detachEvent = false) {
 
 export function createBookingService(repository, paymentGateway) {
   return {
+    async list(userId) {
+      const ownerId = requireUserId(userId);
+      return (await repository.listBookings())
+        .filter((booking) => booking.userId === ownerId);
+    },
+
+    async get(userId, reference) {
+      const ownerId = requireUserId(userId);
+      const booking = await repository.findBooking(reference);
+      if (!booking || booking.userId !== ownerId) {
+        throw new DomainError('NOT_FOUND', `Booking "${reference}" was not found.`);
+      }
+      return booking;
+    },
+
     async book(userId, { eventId, tierId, attendeeName, quantity }) {
       const ownerId = requireUserId(userId);
       const event = await repository.findEvent(eventId);
@@ -57,7 +72,7 @@ export function createBookingService(repository, paymentGateway) {
         throw new DomainError('NOT_FOUND', `Booking "${reference}" was not found.`);
       }
       if (booking.userId !== ownerId) {
-        throw new DomainError('FORBIDDEN', 'Only the attendee who made this booking can pay for it.');
+        throw new DomainError('NOT_FOUND', `Booking "${reference}" was not found.`);
       }
       assertTransition(booking.status, 'paid');
 
@@ -81,7 +96,7 @@ export function createBookingService(repository, paymentGateway) {
         throw new DomainError('NOT_FOUND', `Booking "${reference}" was not found.`);
       }
       if (booking.userId !== ownerId) {
-        throw new DomainError('FORBIDDEN', 'Only the attendee who made this booking can cancel it.');
+        throw new DomainError('NOT_FOUND', `Booking "${reference}" was not found.`);
       }
       if (booking.status !== 'pending') {
         throw new DomainError('INVALID_TRANSITION', 'Only pending bookings can be cancelled in this build.');

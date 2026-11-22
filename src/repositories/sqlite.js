@@ -1,3 +1,4 @@
+import { DomainError } from '../domain/errors.js';
 import { Queue } from '../domain/waitlistQueue.js';
 
 function mapTier(row) {
@@ -46,6 +47,8 @@ export function createSqliteRepository(database) {
   const findBookingRow = database.prepare('SELECT * FROM bookings WHERE reference = ?');
   const eventRows = database.prepare('SELECT * FROM events');
   const bookingRows = database.prepare('SELECT * FROM bookings');
+  const userByEmailRow = database.prepare('SELECT * FROM users WHERE email = ?');
+  const userByIdRow = database.prepare('SELECT id, email, name, role FROM users WHERE id = ?');
 
   function ensureUser(id, role) {
     if (typeof id !== 'string' || id.trim() === '') {
@@ -77,6 +80,43 @@ export function createSqliteRepository(database) {
   }
 
   return {
+    async saveUser(user) {
+      try {
+        database.prepare(`
+          INSERT INTO users (id, name, email, role, password_hash)
+          VALUES (?, ?, ?, ?, ?)
+        `).run(user.id, user.name, user.email, user.role, user.passwordHash);
+      } catch (error) {
+        if (error.message.includes('UNIQUE constraint failed: users.email')) {
+          throw new DomainError('EMAIL_TAKEN', 'That email is already registered.');
+        }
+        throw error;
+      }
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      };
+    },
+
+    async findUserByEmail(email) {
+      const row = userByEmailRow.get(email);
+      if (!row) return null;
+      return {
+        id: row.id,
+        email: row.email,
+        name: row.name,
+        role: row.role,
+        passwordHash: row.password_hash,
+      };
+    },
+
+    async findUserById(id) {
+      const row = userByIdRow.get(id);
+      return row ?? null;
+    },
+
     async saveEvent(event) {
       ensureUser(event.organizerId, 'organizer');
       database.prepare(`

@@ -12,6 +12,14 @@ function getPort(value) {
   return port;
 }
 
+function getJwtSecret(value) {
+  if (typeof value !== 'string' || Buffer.byteLength(value) < 32) {
+    throw new DomainError('VALIDATION', 'Set JWT_SECRET to a secret of at least 32 bytes before starting the server.');
+  }
+  return value;
+}
+
 export const config = Object.freeze({
   port: getPort(process.env.PORT),
+  jwtSecret: getJwtSecret(process.env.JWT_SECRET),
 });

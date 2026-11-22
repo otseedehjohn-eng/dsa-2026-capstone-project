@@ -5,15 +5,19 @@ import { createEventService } from './services/eventService.js';
 import { createBookingService } from './services/bookingService.js';
 import { createMockPaymentGateway } from './lib/mockPaymentGateway.js';
 import { registerApiRoutes } from './http/apiRoutes.js';
+import { createAuthService } from './services/authService.js';
+import { registerAuthRoutes } from './routes/auth.js';
 import { createApp } from './http/app.js';
 
 const database = createDatabase();
 const repository = createSqliteRepository(database);
 const eventService = createEventService(repository);
 const bookingService = createBookingService(repository, createMockPaymentGateway());
+const authService = createAuthService(repository, config.jwtSecret);
 const app = createApp({
   configureRouter(router) {
-    registerApiRoutes(router, eventService, bookingService);
+    registerAuthRoutes(router, authService, config.jwtSecret);
+    registerApiRoutes(router, eventService, bookingService, config.jwtSecret);
   },
 });
 

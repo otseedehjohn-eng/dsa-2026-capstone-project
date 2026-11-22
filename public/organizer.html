@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#183c35">
+    <title>Organizer dashboard · Gather</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script type="module" src="/js/pages/organizer.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="Gather home">Gather<span>.</span></a>
+      <nav class="site-nav" aria-label="Account">
+        <a href="/">Browse events</a>
+        <a href="/tickets.html">My tickets</a>
+        <a href="/login.html">Sign in</a>
+      </nav>
+    </header>
+    <main class="page-shell dashboard-shell">
+      <a class="back-link" href="/">← All events</a>
+      <section class="dashboard-intro">
+        <p class="eyebrow">Organizer workspace</p>
+        <h1 class="event-page-title">Your events</h1>
+        <p class="event-venue">Create an event, add ticket tiers and publish when you’re ready.</p>
+      </section>
+
+      <form id="create-event-form" class="dashboard-form">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Start something</p>
+            <h2>Create event</h2>
+          </div>
+        </div>
+        <div class="dashboard-fields">
+          <div class="field">
+            <label for="event-title">Event title</label>
+            <input id="event-title" name="title" type="text" required>
+          </div>
+          <div class="field">
+            <label for="event-city">City</label>
+            <input id="event-city" name="city" type="text" required>
+          </div>
+          <div class="field">
+            <label for="event-venue">Venue</label>
+            <input id="event-venue" name="venue" type="text" required>
+          </div>
+          <div class="field">
+            <label for="event-date">Date and time</label>
+            <input id="event-date" name="date" type="datetime-local" required>
+          </div>
+        </div>
+        <button class="button button-dark" type="submit">Create draft event</button>
+        <p id="create-event-status" class="form-status" role="status" aria-live="polite"></p>
+      </form>
+
+      <section class="managed-events-section" aria-labelledby="managed-events-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Your workspace</p>
+            <h2 id="managed-events-title">Manage events</h2>
+          </div>
+        </div>
+        <p id="events-status" class="results-status" role="status" aria-live="polite">Loading your events…</p>
+        <div id="managed-events" class="managed-events"></div>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <span>Gather<span class="brand-dot">.</span></span>
+      <span>Organizer actions are verified by the server.</span>
+    </footer>
+  </body>
+</html>

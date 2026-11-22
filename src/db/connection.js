@@ -16,5 +16,9 @@ export function createDatabase(databasePath = defaultDatabasePath) {
   const database = new DatabaseSync(databasePath);
   database.exec('PRAGMA foreign_keys = ON');
   database.exec(readFileSync(schemaPath, 'utf8'));
+  const userColumns = database.prepare('PRAGMA table_info(users)').all();
+  if (!userColumns.some((column) => column.name === 'password_hash')) {
+    database.exec('ALTER TABLE users ADD COLUMN password_hash TEXT');
+  }
   return database;
 }

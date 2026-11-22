@@ -40,3 +40,10 @@ Every time you give an AI tool a significant prompt, add an entry. Three lines e
 - **What I asked:** Build accessible event browsing, event details, ticket selection, a countdown checkout, and mock payment using plain browser modules.
 - **What came back:** Added responsive pages, a safe DOM helper, fixture data, a promise-based mock API, and checkout/payment interactions.
 - **What was wrong (or "nothing"):** The prompt did not specify the hold duration, so I chose a 10-minute mock hold and make its expiry release the reserved mock seats. No other rule was unclear.
+
+## Build 7
+
+### Prompt 1: Login, roles and a connected app (docs/build-7.md)
+- **What I asked:** Add scrypt passwords, expiring HS256 bearer tokens, server-side role and ownership checks, a connected browser app, and auth/privacy tests.
+- **What came back:** Added authentication and token modules, SQLite user persistence with a migration, protected routes, login/ticket/organizer pages, and API tests.
+- **What was wrong (or "nothing"):** The prompt conflicted with S13 about another attendee's booking; I followed the requested `NOT_FOUND` after confirming with the user, updated S13, removed stale `x-user-id` wording from service errors, and added SQLite-auth and browser bearer-token tests. No other prompt rule was unclear.

@@ -1,12 +1,14 @@
-import { createBooking, getEvent, getHoldExpiry, pay } from '../api.js';
+import { cancelBooking, createBooking, getEvent, pay } from '../api.js';
 import {
   el,
   formatEventDate,
   formatPrice,
   getErrorMessage,
 } from '../ui.js';
+import { getToken } from '../session.js';
 
 const content = document.querySelector('#event-content');
+const HOLD_DURATION_MS = 10 * 60 * 1000;
 let countdownTimer;
 
 function clearCountdown() {
@@ -66,11 +68,13 @@ function checkoutPanel(booking) {
     el('button', { className: 'button button-dark pay-button', type: 'submit' }, `Pay ${formatPrice(booking.totalCents)}`),
     errorMessage,
   );
+  const payButton = payForm.querySelector('button[type="submit"]');
+  const payButtonText = payButton.textContent;
 
   payForm.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const submitButton = payForm.querySelector('button[type="submit"]');
-    submitButton.disabled = true;
+    payButton.disabled = true;
+    payButton.textContent = 'Processing payment…';
     errorMessage.hidden = true;
 
     try {
@@ -85,7 +89,8 @@ function checkoutPanel(booking) {
     } catch (error) {
       errorMessage.textContent = getErrorMessage(error);
       errorMessage.hidden = false;
-      submitButton.disabled = false;
+      payButton.disabled = false;
+      payButton.textContent = payButtonText;
     }
   });
   panel.append(payForm);
@@ -100,7 +105,7 @@ function checkoutPanel(booking) {
 
     if (remaining === 0) {
       clearCountdown();
-      getEvent(booking.eventId).catch((error) => {
+      cancelBooking(booking.reference).catch((error) => {
         errorMessage.textContent = getErrorMessage(error);
         errorMessage.hidden = false;
       });
@@ -168,8 +173,14 @@ function ticketTier(tier, eventId, onBooked) {
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (!form.reportValidity()) return;
+    if (!getToken()) {
+      const returnTo = `${window.location.pathname}${window.location.search}`;
+      window.location.assign(`/login.html?returnTo=${encodeURIComponent(returnTo)}`);
+      return;
+    }
 
     submitButton.disabled = true;
+    submitButton.textContent = 'Creating booking…';
     errorMessage.hidden = true;
     try {
       const booking = await createBooking({
@@ -178,11 +189,15 @@ function ticketTier(tier, eventId, onBooked) {
         attendeeName: attendeeName.value,
         quantity: Number(quantity.value),
       });
-      onBooked({ ...booking, holdExpiresAt: await getHoldExpiry(booking.reference) });
+      onBooked({
+        ...booking,
+        holdExpiresAt: new Date(Date.now() + HOLD_DURATION_MS).toISOString(),
+      });
     } catch (error) {
       errorMessage.textContent = getErrorMessage(error);
       errorMessage.hidden = false;
       submitButton.disabled = false;
+      submitButton.textContent = 'Continue to checkout';
     }
   });
 
@@ -205,8 +220,10 @@ function renderEvent(event, booking) {
       const updatedEvent = await getEvent(event.id);
       renderEvent(updatedEvent, newBooking);
     } catch (error) {
-      content.replaceChildren(
-        el('p', { className: 'error-panel', role: 'alert' }, getErrorMessage(error)),
+      renderEvent(event, newBooking);
+      content.prepend(
+        el('p', { className: 'error-panel', role: 'alert' },
+          `Your booking was created, but availability could not refresh: ${getErrorMessage(error)}`),
       );
     }
   }));

@@ -30,6 +30,8 @@ function sendError(response, statusCode, code, message) {
 function statusForError(error) {
   if (error instanceof DomainError) {
     if (error.code === 'UNAUTHENTICATED') return 401;
+    if (error.code === 'INVALID_CREDENTIALS') return 401;
+    if (error.code === 'EMAIL_TAKEN') return 409;
     if (error.code === 'FORBIDDEN') return 403;
     if (error.code === 'PAYMENT_DECLINED') return 402;
     if (error.code === 'NOT_FOUND') return 404;

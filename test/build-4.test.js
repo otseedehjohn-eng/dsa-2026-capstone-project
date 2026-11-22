@@ -3,10 +3,20 @@ import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import { createApp } from '../src/http/app.js';
 import { registerApiRoutes } from '../src/http/apiRoutes.js';
+import { registerAuthRoutes } from '../src/routes/auth.js';
 import { createMockPaymentGateway } from '../src/lib/mockPaymentGateway.js';
 import { createMemoryRepository } from '../src/repositories/memory.js';
+import { createAuthService } from '../src/services/authService.js';
 import { createBookingService } from '../src/services/bookingService.js';
 import { createEventService } from '../src/services/eventService.js';
+import { signToken } from '../src/lib/token.js';
+
+const TOKEN_SECRET = 'build-four-test-secret-at-least-32-bytes';
+
+function tokenFor(userId) {
+  const role = userId.startsWith('organizer-') ? 'organizer' : 'attendee';
+  return signToken({ sub: userId, email: `${userId}@example.test`, role }, TOKEN_SECRET);
+}
 
 async function startApi(t) {
   const repository = createMemoryRepository();
@@ -21,9 +31,11 @@ async function startApi(t) {
   };
   const eventService = createEventService(repository);
   const bookingService = createBookingService(repository, gateway);
+  const authService = createAuthService(repository, TOKEN_SECRET);
   const server = createApp({
     configureRouter(router) {
-      registerApiRoutes(router, eventService, bookingService);
+      registerAuthRoutes(router, authService, TOKEN_SECRET);
+      registerApiRoutes(router, eventService, bookingService, TOKEN_SECRET);
     },
   });
   server.listen(0, '127.0.0.1');
@@ -39,7 +51,7 @@ async function startApi(t) {
 
 async function request(baseUrl, route, { method = 'GET', userId, body } = {}) {
   const headers = {};
-  if (userId) headers['x-user-id'] = userId;
+  if (userId) headers.authorization = `Bearer ${tokenFor(userId)}`;
   if (body !== undefined) headers['content-type'] = 'application/json';
   return fetch(`${baseUrl}${route}`, {
     method,
@@ -144,8 +156,8 @@ test('real API supports event creation, search, booking, payment, and cancellati
       userId: 'attendee-2',
       body: { decline: false },
     }),
-    403,
-    'FORBIDDEN',
+    404,
+    'NOT_FOUND',
   );
 
   await assertError(
@@ -232,7 +244,10 @@ test('API maps invalid JSON, validation failures, and unknown routes to JSON err
   const { baseUrl } = await startApi(t);
   const malformed = await fetch(`${baseUrl}/api/events`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-user-id': 'organizer-1' },
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${tokenFor('organizer-1')}`,
+    },
     body: '{',
   });
   await assertError(malformed, 400, 'BAD_JSON');

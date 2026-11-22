@@ -11,7 +11,7 @@ import { searchEvents } from '../domain/eventSearch.js';
 
 function requireUserId(userId) {
   if (typeof userId !== 'string' || userId.trim() === '') {
-    throw new DomainError('UNAUTHENTICATED', 'The x-user-id header is required.');
+    throw new DomainError('UNAUTHENTICATED', 'A valid user id is required.');
   }
   return userId.trim();
 }
@@ -92,6 +92,22 @@ export function createEventService(repository) {
       const unpublished = unpublishDomainEvent(storeWithEvent(event), eventId);
       await repository.saveEvent(unpublished);
       return serializeEvent(unpublished);
+    },
+
+    async getPublished(eventId) {
+      const event = await repository.findEvent(eventId);
+      if (!event || !event.published) {
+        throw new DomainError('NOT_FOUND', `Event "${eventId}" was not found.`);
+      }
+      return serializeEvent(event);
+    },
+
+    async listByOrganizer(userId) {
+      const ownerId = requireUserId(userId);
+      const events = await repository.listEvents();
+      return events
+        .filter((event) => event.organizerId === ownerId)
+        .map(serializeEvent);
     },
 
     async search(criteria, sortBy = 'date') {
