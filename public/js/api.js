@@ -85,8 +85,26 @@ export function cancelBooking(reference) {
   });
 }
 
+export function getCancellationPreview(reference) {
+  return request(`/api/bookings/${encodeURIComponent(reference)}/refund`);
+}
+
 export function listMyBookings() {
   return request('/api/bookings');
+}
+
+export function joinWaitlist(entry) {
+  return request('/api/waitlist', { method: 'POST', body: entry });
+}
+
+export function listMyWaitlistOffers() {
+  return request('/api/waitlist/offers');
+}
+
+export function acceptWaitlistOffer(offerId) {
+  return request(`/api/waitlist/${encodeURIComponent(offerId)}/accept`, {
+    method: 'POST',
+  });
 }
 
 export function createEvent(details) {

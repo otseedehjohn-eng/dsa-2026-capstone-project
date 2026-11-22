@@ -11,6 +11,12 @@
 - The website shows the refund amount before you confirm a cancel, offers "Join waitlist" on sold-out tiers, and shows offers with a countdown.
 - Your debugging exercise write-up is complete.
 
+## Hold and offer timing
+
+Unpaid bookings and waitlist offers each hold seats for 10 minutes. A waitlist
+entry requests one seat; when several seats are freed, offers are created in
+FIFO order, one seat per waiting attendee.
+
 ## User stories in this build
 
 ### S09: As an attendee, I want to cancel a booking and get a refund by the policy, so that I am not stuck if plans change

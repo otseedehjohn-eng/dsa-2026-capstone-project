@@ -96,10 +96,39 @@ curl -i -X POST http://localhost:3000/api/bookings/BOOKING_REFERENCE/pay \
 ```
 
 To try a declined mock payment, send `{"decline":true}`. The booking stays
-pending and can be paid again.
+pending and can be paid again before its 10-minute hold expires.
+
+```sh
+curl -i http://localhost:3000/api/bookings/BOOKING_REFERENCE/refund \
+  -H "authorization: Bearer ATTENDEE_TOKEN"
+```
+
+For paid bookings, preview the current refund amount before confirming the
+cancellation. Then submit it:
 
 ```sh
 curl -i -X POST http://localhost:3000/api/bookings/BOOKING_REFERENCE/cancel \
+  -H "authorization: Bearer ATTENDEE_TOKEN"
+```
+
+## Waitlist
+
+Join a sold-out tier with one ticket requested per attendee:
+
+```sh
+curl -i -X POST http://localhost:3000/api/waitlist \
+  -H "content-type: application/json" \
+  -H "authorization: Bearer ATTENDEE_TOKEN" \
+  -d '{"eventId":"EVENT_ID","tierId":"TIER_ID","attendeeName":"Ada"}'
+```
+
+List your active offers and accept one before its 10-minute deadline:
+
+```sh
+curl -i http://localhost:3000/api/waitlist/offers \
+  -H "authorization: Bearer ATTENDEE_TOKEN"
+
+curl -i -X POST http://localhost:3000/api/waitlist/OFFER_ID/accept \
   -H "authorization: Bearer ATTENDEE_TOKEN"
 ```
 

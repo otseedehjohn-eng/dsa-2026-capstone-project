@@ -31,7 +31,13 @@ function parseQuery(query) {
   return { criteria, sortBy: query.get('sort') ?? 'date' };
 }
 
-export function registerApiRoutes(router, eventService, bookingService, tokenSecret = process.env.JWT_SECRET) {
+export function registerApiRoutes(
+  router,
+  eventService,
+  bookingService,
+  tokenSecret = process.env.JWT_SECRET,
+  waitlistService,
+) {
   router.add('POST', '/api/events', async ({ request, response, body }) => {
     const user = requireRole(requireUser(request, tokenSecret), 'organizer');
     const event = await eventService.create(user.sub, requireBody(body));
@@ -91,6 +97,11 @@ export function registerApiRoutes(router, eventService, bookingService, tokenSec
     return bookingService.get(user.sub, params.reference);
   });
 
+  router.add('GET', '/api/bookings/:reference/refund', ({ request, params }) => {
+    const user = requireRole(requireUser(request, tokenSecret), 'attendee');
+    return bookingService.previewCancellation(user.sub, params.reference);
+  });
+
   router.add('POST', '/api/bookings/:reference/pay', ({ request, params, body }) => {
     const user = requireRole(requireUser(request, tokenSecret), 'attendee');
     const paymentRequest = body === undefined ? {} : requireBody(body);
@@ -104,4 +115,22 @@ export function registerApiRoutes(router, eventService, bookingService, tokenSec
     const user = requireRole(requireUser(request, tokenSecret), 'attendee');
     return bookingService.cancel(user.sub, params.reference);
   });
+
+  if (waitlistService) {
+    router.add('POST', '/api/waitlist', ({ request, response, body }) => {
+      const user = requireRole(requireUser(request, tokenSecret), 'attendee');
+      response.statusCode = 201;
+      return waitlistService.join(user.sub, requireBody(body));
+    });
+
+    router.add('GET', '/api/waitlist/offers', ({ request }) => {
+      const user = requireRole(requireUser(request, tokenSecret), 'attendee');
+      return waitlistService.listOffers(user.sub);
+    });
+
+    router.add('POST', '/api/waitlist/:offerId/accept', ({ request, params }) => {
+      const user = requireRole(requireUser(request, tokenSecret), 'attendee');
+      return waitlistService.accept(params.offerId, user.sub);
+    });
+  }
 }

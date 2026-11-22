@@ -22,11 +22,17 @@ async function startApi(t) {
   const repository = createMemoryRepository();
   const paymentGateway = createMockPaymentGateway();
   let chargeCount = 0;
+  let refundCount = 0;
   const gateway = {
     async charge(request) {
       chargeCount += 1;
       assert.equal(Object.hasOwn(request, 'cardNumber'), false);
       return paymentGateway.charge(request);
+    },
+    async refund(request) {
+      refundCount += 1;
+      assert.equal(Object.hasOwn(request, 'cardNumber'), false);
+      return paymentGateway.refund(request);
     },
   };
   const eventService = createEventService(repository);
@@ -46,6 +52,7 @@ async function startApi(t) {
   return {
     baseUrl: `http://127.0.0.1:${server.address().port}`,
     getChargeCount: () => chargeCount,
+    getRefundCount: () => refundCount,
   };
 }
 
@@ -70,7 +77,8 @@ async function assertError(response, status, code) {
 }
 
 test('real API supports event creation, search, booking, payment, and cancellation', async (t) => {
-  const { baseUrl, getChargeCount } = await startApi(t);
+  const { baseUrl, getChargeCount, getRefundCount } = await startApi(t);
+  const eventDate = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString();
 
   await assertError(
     await request(baseUrl, '/api/events', {
@@ -88,7 +96,7 @@ test('real API supports event creation, search, booking, payment, and cancellati
       title: 'Lagos Tech Meetup',
       city: 'Lagos',
       venue: 'Civic Centre',
-      date: '2026-12-05T17:00:00Z',
+      date: eventDate,
     },
   });
   assert.equal(createdResponse.status, 201);
@@ -135,7 +143,7 @@ test('real API supports event creation, search, booking, payment, and cancellati
 
   const searchResponse = await request(
     baseUrl,
-    '/api/events?q=TECH&city=lagos&from=2026-12-05&to=2026-12-05&maxPriceCents=5000&onlyAvailable=true&sort=price',
+    `/api/events?q=TECH&city=lagos&from=${eventDate.slice(0, 10)}&to=${eventDate.slice(0, 10)}&maxPriceCents=5000&onlyAvailable=true&sort=price`,
   );
   assert.equal(searchResponse.status, 200);
   assert.deepEqual((await searchResponse.json()).map(({ id }) => id), [event.id]);
@@ -187,6 +195,19 @@ test('real API supports event creation, search, booking, payment, and cancellati
     409,
     'INVALID_TRANSITION',
   );
+  assert.equal(getChargeCount(), 2);
+
+  const refundPreview = await request(baseUrl, `/api/bookings/${booking.reference}/refund`, {
+    userId: 'attendee-1',
+  });
+  assert.equal((await refundPreview.json()).refundCents, booking.totalCents);
+  const paidCancellation = await request(baseUrl, `/api/bookings/${booking.reference}/cancel`, {
+    method: 'POST',
+    userId: 'attendee-1',
+  });
+  assert.equal(paidCancellation.status, 200);
+  assert.equal((await paidCancellation.json()).status, 'refunded');
+  assert.equal(getRefundCount(), 1);
   await assertError(
     await request(baseUrl, `/api/bookings/${booking.reference}/cancel`, {
       method: 'POST',
@@ -195,7 +216,6 @@ test('real API supports event creation, search, booking, payment, and cancellati
     409,
     'INVALID_TRANSITION',
   );
-  assert.equal(getChargeCount(), 2);
 
   const secondBookingResponse = await request(baseUrl, '/api/bookings', {
     method: 'POST',

@@ -35,7 +35,17 @@ function statusForError(error) {
     if (error.code === 'FORBIDDEN') return 403;
     if (error.code === 'PAYMENT_DECLINED') return 402;
     if (error.code === 'NOT_FOUND') return 404;
-    if (error.code === 'INVALID_STATE' || error.code === 'INVALID_TRANSITION' || error.code === 'SOLD_OUT') return 409;
+    if (error.code === 'REFUND_FAILED') return 502;
+    if (
+      error.code === 'EVENT_STARTED'
+      || error.code === 'BOOKING_EXPIRED'
+      || error.code === 'ALREADY_ON_WAITLIST'
+      || error.code === 'NOT_SOLD_OUT'
+      || error.code === 'OFFER_EXPIRED'
+      || error.code === 'INVALID_STATE'
+      || error.code === 'INVALID_TRANSITION'
+      || error.code === 'SOLD_OUT'
+    ) return 409;
     return 400;
   }
   return 500;

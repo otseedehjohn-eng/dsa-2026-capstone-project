@@ -6,5 +6,8 @@ export function createMockPaymentGateway() {
       }
       return { success: true, amountCents };
     },
+    async refund({ amountCents }) {
+      return { success: true, amountCents };
+    },
   };
 }

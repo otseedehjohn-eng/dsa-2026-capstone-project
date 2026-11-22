@@ -20,5 +20,15 @@ export function createDatabase(databasePath = defaultDatabasePath) {
   if (!userColumns.some((column) => column.name === 'password_hash')) {
     database.exec('ALTER TABLE users ADD COLUMN password_hash TEXT');
   }
+  const bookingColumns = database.prepare('PRAGMA table_info(bookings)').all();
+  if (!bookingColumns.some((column) => column.name === 'refunded_cents')) {
+    database.exec('ALTER TABLE bookings ADD COLUMN refunded_cents INTEGER NOT NULL DEFAULT 0 CHECK (refunded_cents >= 0)');
+  }
+  if (!bookingColumns.some((column) => column.name === 'hold_expires_at')) {
+    database.exec('ALTER TABLE bookings ADD COLUMN hold_expires_at TEXT');
+  }
+  if (!bookingColumns.some((column) => column.name === 'hold_expired')) {
+    database.exec('ALTER TABLE bookings ADD COLUMN hold_expired INTEGER NOT NULL DEFAULT 0 CHECK (hold_expired IN (0, 1))');
+  }
   return database;
 }

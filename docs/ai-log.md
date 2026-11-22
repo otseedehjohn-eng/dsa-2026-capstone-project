@@ -47,3 +47,10 @@ Every time you give an AI tool a significant prompt, add an entry. Three lines e
 - **What I asked:** Add scrypt passwords, expiring HS256 bearer tokens, server-side role and ownership checks, a connected browser app, and auth/privacy tests.
 - **What came back:** Added authentication and token modules, SQLite user persistence with a migration, protected routes, login/ticket/organizer pages, and API tests.
 - **What was wrong (or "nothing"):** The prompt conflicted with S13 about another attendee's booking; I followed the requested `NOT_FOUND` after confirming with the user, updated S13, removed stale `x-user-id` wording from service errors, and added SQLite-auth and browser bearer-token tests. No other prompt rule was unclear.
+
+## Build 8
+
+### Prompt 1: Refunds, waitlist, expiry and maintenance (docs/build-8.md)
+- **What I asked:** Add a controllable clock, tiered refunds, compare-and-set cancellation, FIFO seat offers, unpaid-booking expiry, the browser flows, and focused tests.
+- **What came back:** Added refund and waitlist services, SQLite persistence and atomic offer operations, a maintenance job, API endpoints, UI changes, and boundary/concurrency coverage.
+- **What was wrong (or "nothing"):** Offer/hold durations and multi-seat allocation were unspecified, so I asked and implemented 10 minutes each with one seat per attendee in FIFO order. I fixed offer acceptance to insert its booking before linking the foreign key, and the optional debugging-exercise file was not present to complete a write-up.

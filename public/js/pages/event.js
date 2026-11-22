@@ -1,4 +1,10 @@
-import { cancelBooking, createBooking, getEvent, pay } from '../api.js';
+import {
+  cancelBooking,
+  createBooking,
+  getEvent,
+  joinWaitlist,
+  pay,
+} from '../api.js';
 import {
   el,
   formatEventDate,
@@ -8,7 +14,6 @@ import {
 import { getToken } from '../session.js';
 
 const content = document.querySelector('#event-content');
-const HOLD_DURATION_MS = 10 * 60 * 1000;
 let countdownTimer;
 
 function clearCountdown() {
@@ -106,8 +111,10 @@ function checkoutPanel(booking) {
     if (remaining === 0) {
       clearCountdown();
       cancelBooking(booking.reference).catch((error) => {
-        errorMessage.textContent = getErrorMessage(error);
-        errorMessage.hidden = false;
+        if (error.code !== 'BOOKING_EXPIRED') {
+          errorMessage.textContent = getErrorMessage(error);
+          errorMessage.hidden = false;
+        }
       });
       timer.textContent = 'Hold expired';
       errorMessage.textContent = 'Your ticket hold expired. Return to the event to choose tickets again.';
@@ -147,25 +154,27 @@ function ticketTier(tier, eventId, onBooked) {
     autocomplete: 'name',
     placeholder: 'Your name',
     required: true,
-    disabled: soldOut,
   });
   const submitButton = el('button', {
     className: soldOut ? 'button button-outline' : 'button button-green',
     type: 'submit',
-    disabled: soldOut,
-  }, soldOut ? 'Sold out' : 'Continue to checkout');
+  }, soldOut ? 'Join waitlist' : 'Continue to checkout');
+
+  const fields = [
+    el('div', { className: 'field' }, [
+      el('label', { htmlFor: attendeeId }, 'Attendee name'),
+      attendeeName,
+    ]),
+  ];
+  if (!soldOut) {
+    fields.push(el('div', { className: 'field quantity-field' }, [
+      el('label', { htmlFor: quantityId }, `Quantity · up to ${Math.min(10, tier.seatsLeft)}`),
+      quantity,
+    ]));
+  }
 
   form.append(
-    el('div', { className: 'tier-fields' }, [
-      el('div', { className: 'field' }, [
-        el('label', { htmlFor: attendeeId }, 'Attendee name'),
-        attendeeName,
-      ]),
-      el('div', { className: 'field quantity-field' }, [
-        el('label', { htmlFor: quantityId }, `Quantity · up to ${Math.min(10, tier.seatsLeft)}`),
-        quantity,
-      ]),
-    ]),
+    el('div', { className: soldOut ? 'tier-fields waitlist-fields' : 'tier-fields' }, fields),
     submitButton,
     errorMessage,
   );
@@ -180,24 +189,46 @@ function ticketTier(tier, eventId, onBooked) {
     }
 
     submitButton.disabled = true;
-    submitButton.textContent = 'Creating booking…';
+    submitButton.textContent = soldOut ? 'Joining waitlist…' : 'Creating booking…';
     errorMessage.hidden = true;
     try {
+      if (soldOut) {
+        await joinWaitlist({
+          eventId,
+          tierId: tier.id,
+          attendeeName: attendeeName.value,
+        });
+        submitButton.textContent = 'Joined waitlist';
+        return;
+      }
       const booking = await createBooking({
         eventId,
         tierId: tier.id,
         attendeeName: attendeeName.value,
         quantity: Number(quantity.value),
       });
-      onBooked({
-        ...booking,
-        holdExpiresAt: new Date(Date.now() + HOLD_DURATION_MS).toISOString(),
-      });
+      onBooked(booking);
     } catch (error) {
+      if (soldOut && error.code === 'NOT_SOLD_OUT') {
+        try {
+          renderEvent(await getEvent(eventId));
+          content.prepend(
+            el('p', { className: 'form-status', role: 'status' },
+              'Seats became available. Ticket availability has been refreshed.'),
+          );
+          return;
+        } catch (refreshError) {
+          errorMessage.textContent = getErrorMessage(refreshError);
+          errorMessage.hidden = false;
+          submitButton.disabled = false;
+          submitButton.textContent = 'Join waitlist';
+          return;
+        }
+      }
       errorMessage.textContent = getErrorMessage(error);
       errorMessage.hidden = false;
       submitButton.disabled = false;
-      submitButton.textContent = 'Continue to checkout';
+      submitButton.textContent = soldOut ? 'Join waitlist' : 'Continue to checkout';
     }
   });
 
