@@ -9,6 +9,7 @@ import { registerApiRoutes } from './http/apiRoutes.js';
 import { createAuthService } from './services/authService.js';
 import { createSeatService } from './services/seatService.js';
 import { createWaitlistService } from './services/waitlistService.js';
+import { createCheckinService } from './services/checkinService.js';
 import { registerAuthRoutes } from './routes/auth.js';
 import { createApp } from './http/app.js';
 
@@ -21,12 +22,20 @@ const bookingService = createBookingService(repository, createMockPaymentGateway
   seatService,
   waitlistService,
 });
+const checkinService = createCheckinService(repository, config.ticketTokenSecret);
 const authService = createAuthService(repository, config.jwtSecret);
 const maintenance = createMaintenance({ repository, bookingService, waitlistService });
 const app = createApp({
   configureRouter(router) {
     registerAuthRoutes(router, authService, config.jwtSecret);
-    registerApiRoutes(router, eventService, bookingService, config.jwtSecret, waitlistService);
+    registerApiRoutes(
+      router,
+      eventService,
+      bookingService,
+      config.jwtSecret,
+      waitlistService,
+      checkinService,
+    );
   },
 });
 

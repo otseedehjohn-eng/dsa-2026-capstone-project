@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DomainError } from '../domain/errors.js';
 import { createRouter } from './router.js';
+import { applySecurityHeaders } from './securityHeaders.js';
 
 const publicDirectory = path.resolve(fileURLToPath(new URL('../../public/', import.meta.url)));
 const MIME_TYPES = new Map([
@@ -33,6 +34,7 @@ function statusForError(error) {
     if (error.code === 'INVALID_CREDENTIALS') return 401;
     if (error.code === 'EMAIL_TAKEN') return 409;
     if (error.code === 'FORBIDDEN') return 403;
+    if (error.code === 'RATE_LIMITED') return 429;
     if (error.code === 'PAYMENT_DECLINED') return 402;
     if (error.code === 'NOT_FOUND') return 404;
     if (error.code === 'REFUND_FAILED') return 502;
@@ -45,6 +47,9 @@ function statusForError(error) {
       || error.code === 'INVALID_STATE'
       || error.code === 'INVALID_TRANSITION'
       || error.code === 'SOLD_OUT'
+      || error.code === 'WRONG_EVENT'
+      || error.code === 'DUPLICATE_SCAN'
+      || error.code === 'BOOKING_NOT_ACTIVE'
     ) return 409;
     return 400;
   }
@@ -121,6 +126,7 @@ export function createApp({ configureRouter } = {}) {
   configureRouter?.(router);
 
   return createServer(async (request, response) => {
+    applySecurityHeaders(response);
     try {
       const requestUrl = new URL(request.url, 'http://localhost');
       const body = await readJsonBody(request);

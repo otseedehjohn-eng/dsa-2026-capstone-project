@@ -229,6 +229,7 @@ p {
 
 .field input,
 .field select,
+.field textarea,
 .pay-form select {
   width: 100%;
   min-height: 45px;
@@ -237,6 +238,11 @@ p {
   border-radius: 9px;
   color: var(--ink);
   background: var(--white);
+}
+
+.field textarea {
+  padding-top: 10px;
+  resize: vertical;
 }
 
 .field input::placeholder {
@@ -823,6 +829,11 @@ p {
 .status-cancelled {
   color: #8d4b3e;
   background: #f8ece8;
+}
+
+.status-checked_in {
+  color: #244e76;
+  background: #e8f0f8;
 }
 
 .ticket-detail {

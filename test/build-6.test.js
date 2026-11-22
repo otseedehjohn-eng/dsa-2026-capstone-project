@@ -23,6 +23,7 @@ test('static server serves the public app pages, modules, and stylesheet', async
     ['/login.html', /text\/html/],
     ['/tickets.html', /text\/html/],
     ['/organizer.html', /text\/html/],
+    ['/checkin.html', /text\/html/],
     ['/js/api.js', /javascript/],
     ['/js/session.js', /javascript/],
     ['/js/pages/home.js', /javascript/],
@@ -30,6 +31,7 @@ test('static server serves the public app pages, modules, and stylesheet', async
     ['/js/pages/login.js', /javascript/],
     ['/js/pages/tickets.js', /javascript/],
     ['/js/pages/organizer.js', /javascript/],
+    ['/js/pages/checkin.js', /javascript/],
     ['/css/styles.css', /text\/css/],
   ]) {
     const response = await fetch(`${baseUrl}${pathname}`);

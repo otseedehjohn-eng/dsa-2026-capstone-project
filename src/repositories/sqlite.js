@@ -39,6 +39,7 @@ function mapBooking(row) {
     refundedCents: row.refunded_cents,
     holdExpiresAt: row.hold_expires_at,
     holdExpired: row.hold_expired === 1,
+    checkedInAt: row.checked_in_at,
     status: row.status,
   };
 }
@@ -253,6 +254,18 @@ export function createSqliteRepository(database) {
         reference,
         expectedStatus,
       );
+      return result.changes === 1;
+    },
+
+    async checkInBooking(reference, eventId, checkedInAt) {
+      const result = database.prepare(`
+        UPDATE bookings
+        SET status = 'checked_in', checked_in_at = ?
+        WHERE reference = ?
+          AND event_id = ?
+          AND status = 'paid'
+          AND checked_in_at IS NULL
+      `).run(checkedInAt, reference, eventId);
       return result.changes === 1;
     },
 

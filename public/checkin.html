@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#183c35">
+    <title>Staff check-in · Gather</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script type="module" src="/js/pages/checkin.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="Gather home">Gather<span>.</span></a>
+      <nav class="site-nav" aria-label="Account">
+        <a href="/">Browse events</a>
+        <a href="/tickets.html">My tickets</a>
+      </nav>
+    </header>
+    <main class="page-shell dashboard-shell">
+      <a class="back-link" href="/">← All events</a>
+      <section class="dashboard-intro">
+        <p class="eyebrow">Staff workspace</p>
+        <h1 class="event-page-title">Check in a ticket</h1>
+        <p class="event-venue">Paste a ticket code or focus the code field and scan with a QR scanner.</p>
+      </section>
+      <form id="checkin-form" class="dashboard-form">
+        <div class="field">
+          <label for="event-id">Event ID</label>
+          <input id="event-id" name="eventId" type="text" autocomplete="off" required>
+        </div>
+        <div class="field">
+          <label for="ticket-code">Ticket code</label>
+          <textarea id="ticket-code" name="ticketToken" rows="4" autocomplete="off" required></textarea>
+        </div>
+        <button class="button button-dark" type="submit">Check in</button>
+        <p id="checkin-status" class="form-status" role="status" aria-live="polite"></p>
+      </form>
+    </main>
+    <footer class="site-footer">
+      <span>Gather<span class="brand-dot">.</span></span>
+      <span>Ticket codes are verified and admitted once.</span>
+    </footer>
+  </body>
+</html>

@@ -14,7 +14,7 @@
     "benchmark": "node scripts/benchmark-lookup.js",
     "seed": "node scripts/seed.js",
     "oversell": "node scripts/oversell-demo.js",
-    "start": "node src/server.js",
+    "start": "node --env-file-if-exists=.env src/server.js",
     "test": "node --test"
   }
 }

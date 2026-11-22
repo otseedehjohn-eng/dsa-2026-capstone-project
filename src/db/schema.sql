@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   refunded_cents INTEGER NOT NULL DEFAULT 0 CHECK (refunded_cents >= 0),
   hold_expires_at TEXT,
   hold_expired INTEGER NOT NULL DEFAULT 0 CHECK (hold_expired IN (0, 1)),
+  checked_in_at TEXT,
   status TEXT NOT NULL CHECK (status IN ('pending', 'paid', 'cancelled', 'refunded', 'checked_in')),
   FOREIGN KEY (tier_id, event_id) REFERENCES ticket_tiers(id, event_id)
 );

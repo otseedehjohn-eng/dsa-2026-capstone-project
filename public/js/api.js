@@ -93,6 +93,17 @@ export function listMyBookings() {
   return request('/api/bookings');
 }
 
+export function getTicketToken(reference) {
+  return request(`/api/bookings/${encodeURIComponent(reference)}/ticket-token`);
+}
+
+export function checkIn(ticketToken, eventId) {
+  return request('/api/checkin', {
+    method: 'POST',
+    body: { ticketToken, eventId },
+  });
+}
+
 export function joinWaitlist(entry) {
   return request('/api/waitlist', { method: 'POST', body: entry });
 }

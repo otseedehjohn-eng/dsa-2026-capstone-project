@@ -98,6 +98,21 @@ export function createMemoryRepository() {
       return true;
     },
 
+    async checkInBooking(reference, eventId, checkedInAt) {
+      const booking = bookings.get(reference);
+      if (
+        !booking
+        || booking.eventId !== eventId
+        || booking.status !== 'paid'
+        || booking.checkedInAt
+      ) {
+        return false;
+      }
+      booking.status = 'checked_in';
+      booking.checkedInAt = checkedInAt;
+      return true;
+    },
+
     async findBooking(reference) {
       return bookings.get(reference) ?? null;
     },

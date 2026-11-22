@@ -54,3 +54,10 @@ Every time you give an AI tool a significant prompt, add an entry. Three lines e
 - **What I asked:** Add a controllable clock, tiered refunds, compare-and-set cancellation, FIFO seat offers, unpaid-booking expiry, the browser flows, and focused tests.
 - **What came back:** Added refund and waitlist services, SQLite persistence and atomic offer operations, a maintenance job, API endpoints, UI changes, and boundary/concurrency coverage.
 - **What was wrong (or "nothing"):** Offer/hold durations and multi-seat allocation were unspecified, so I asked and implemented 10 minutes each with one seat per attendee in FIFO order. I fixed offer acceptance to insert its booking before linking the foreign key, and the optional debugging-exercise file was not present to complete a write-up.
+
+## Build 9
+
+### Prompt 1: QR check-in, CI and security (docs/build-9.md)
+- **What I asked:** Add signed privacy-minimal ticket codes, staff-only check-in with an atomic single-use update, security headers, per-IP rate limits, CI, security guidance and tests.
+- **What came back:** Added ticket signing and verification, event-scoped staff check-in, atomic SQLite admission, rate limits, security headers, the check-in page, CI, documentation and tests.
+- **What was wrong (or "nothing"):** The prompt referenced `public/js/qr.js`, but that encoder was absent from the repository. I asked before substituting an encoder; the user chose to provide the vendored file and defer QR rendering until then. Staff assignment records were also absent, so the user chose staff-role authorization with an event id supplied for each scan.

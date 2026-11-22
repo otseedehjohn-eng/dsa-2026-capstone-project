@@ -182,6 +182,7 @@ test('database startup migrates existing Build 7 booking tables', () => {
     assert.ok(bookingColumns.includes('refunded_cents'));
     assert.ok(bookingColumns.includes('hold_expires_at'));
     assert.ok(bookingColumns.includes('hold_expired'));
+    assert.ok(bookingColumns.includes('checked_in_at'));
     assert.ok(database.prepare(`
       SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?
     `).get('waitlist_offers'));

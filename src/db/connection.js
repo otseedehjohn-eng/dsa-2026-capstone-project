@@ -30,5 +30,8 @@ export function createDatabase(databasePath = defaultDatabasePath) {
   if (!bookingColumns.some((column) => column.name === 'hold_expired')) {
     database.exec('ALTER TABLE bookings ADD COLUMN hold_expired INTEGER NOT NULL DEFAULT 0 CHECK (hold_expired IN (0, 1))');
   }
+  if (!bookingColumns.some((column) => column.name === 'checked_in_at')) {
+    database.exec('ALTER TABLE bookings ADD COLUMN checked_in_at TEXT');
+  }
   return database;
 }

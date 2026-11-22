@@ -12,6 +12,11 @@
 - A push to GitHub runs the tests automatically and they pass.
 - You have one "the AI got this wrong" story ready for the demo.
 
+## Check-in event scope
+
+Check-in requires a staff account and the event id selected by staff. This
+build does not persist staff-to-event assignments.
+
 ## User stories in this build
 
 ### S14: As a staff, I want to scan a ticket's QR code at the door, so that I can admit the right people

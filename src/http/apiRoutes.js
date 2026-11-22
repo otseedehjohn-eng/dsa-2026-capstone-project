@@ -1,5 +1,6 @@
 import { DomainError } from '../domain/errors.js';
 import { requireRole, requireUser } from './guards.js';
+import { createRateLimiter } from '../lib/rateLimit.js';
 
 function requireBody(body) {
   if (body === null || typeof body !== 'object' || Array.isArray(body)) {
@@ -37,6 +38,8 @@ export function registerApiRoutes(
   bookingService,
   tokenSecret = process.env.JWT_SECRET,
   waitlistService,
+  checkinService,
+  checkinRateLimiter = createRateLimiter({ limit: 30, windowMs: 60 * 1000 }),
 ) {
   router.add('POST', '/api/events', async ({ request, response, body }) => {
     const user = requireRole(requireUser(request, tokenSecret), 'organizer');
@@ -96,6 +99,19 @@ export function registerApiRoutes(
     const user = requireRole(requireUser(request, tokenSecret), 'attendee');
     return bookingService.get(user.sub, params.reference);
   });
+
+  if (checkinService) {
+    router.add('GET', '/api/bookings/:reference/ticket-token', ({ request, params }) => {
+      const user = requireRole(requireUser(request, tokenSecret), 'attendee');
+      return checkinService.ticketForAttendee(user.sub, params.reference);
+    });
+
+    router.add('POST', '/api/checkin', ({ request, body }) => {
+      checkinRateLimiter.consume(request.socket?.remoteAddress ?? 'unknown');
+      requireRole(requireUser(request, tokenSecret), 'staff');
+      return checkinService.checkIn(requireBody(body));
+    });
+  }
 
   router.add('GET', '/api/bookings/:reference/refund', ({ request, params }) => {
     const user = requireRole(requireUser(request, tokenSecret), 'attendee');

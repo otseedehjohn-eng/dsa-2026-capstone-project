@@ -141,6 +141,12 @@ Follow the "Done when" list in [docs/build-1.md](docs/build-1.md). Work on a bra
 - Money is stored as whole numbers of the smallest unit (kobo or cents), never as decimals.
 - You are responsible for every line of your project, including the lines the AI wrote.
 
+## Run the website and API
+
+Copy `.env.example` to `.env`, set distinct random values of at least 32 bytes
+for `JWT_SECRET` and `TICKET_TOKEN_SECRET`, then run `npm start`. The `.env`
+file is ignored by Git and must never be committed.
+
 ## Project layout
 
 ```

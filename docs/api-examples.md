@@ -1,14 +1,15 @@
 # API examples
 
-The app now stores data in SQLite. Set a private token secret before starting
-the server. In PowerShell, generate one with:
+The app stores data in SQLite. Set different private secrets for login tokens
+and ticket codes before starting the server. In PowerShell, generate them with:
 
 ```powershell
 $env:JWT_SECRET = node -p "require('node:crypto').randomBytes(32).toString('base64url')"
+$env:TICKET_TOKEN_SECRET = node -p "require('node:crypto').randomBytes(32).toString('base64url')"
 npm start
 ```
 
-Keep the secret private and use the same value after restarting the server.
+Keep both secrets private and use the same values after restarting the server.
 
 ## Sign up and log in
 
@@ -97,6 +98,24 @@ curl -i -X POST http://localhost:3000/api/bookings/BOOKING_REFERENCE/pay \
 
 To try a declined mock payment, send `{"decline":true}`. The booking stays
 pending and can be paid again before its 10-minute hold expires.
+
+For a paid booking, fetch its signed ticket code. It contains only the booking
+reference and issue time:
+
+```sh
+curl -i http://localhost:3000/api/bookings/BOOKING_REFERENCE/ticket-token \
+  -H "authorization: Bearer ATTENDEE_TOKEN"
+```
+
+Staff submit the code with the event being checked in. The booking is admitted
+only once; later scans return `DUPLICATE_SCAN` with the first check-in time.
+
+```sh
+curl -i -X POST http://localhost:3000/api/checkin \
+  -H "content-type: application/json" \
+  -H "authorization: Bearer STAFF_TOKEN" \
+  -d '{"ticketToken":"SIGNED_TICKET_CODE","eventId":"EVENT_ID"}'
+```
 
 ```sh
 curl -i http://localhost:3000/api/bookings/BOOKING_REFERENCE/refund \
