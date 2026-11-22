@@ -33,3 +33,10 @@ Every time you give an AI tool a significant prompt, add an entry. Three lines e
 - **What I asked:** Reserve capacity with one conditional database update and prove 50 concurrent requests cannot oversell.
 - **What came back:** Added an atomic `UPDATE ... WHERE sold + quantity <= capacity`, the `SOLD_OUT` result, and a 50-request SQLite test.
 - **What was wrong (or "nothing"):** The pre-fix demo output was not present in this checkout, so I did not invent a numeric baseline; the stale-read/write approach can create multiple bookings while persisting the same stale sold count. An in-process lock cannot coordinate other server processes, and separate read/write checks allow all callers to observe the same seat before reservation.
+
+## Build 6
+
+### Prompt 1: Frontend on mock data (docs/build-6.md)
+- **What I asked:** Build accessible event browsing, event details, ticket selection, a countdown checkout, and mock payment using plain browser modules.
+- **What came back:** Added responsive pages, a safe DOM helper, fixture data, a promise-based mock API, and checkout/payment interactions.
+- **What was wrong (or "nothing"):** The prompt did not specify the hold duration, so I chose a 10-minute mock hold and make its expiry release the reserved mock seats. No other rule was unclear.

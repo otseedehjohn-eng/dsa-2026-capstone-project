@@ -3,12 +3,61 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Event Ticketing</title>
+    <meta name="theme-color" content="#183c35">
+    <title>Event Ticketing · Gather — Discover events</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script type="module" src="/js/pages/home.js"></script>
   </head>
   <body>
-    <main>
-      <h1>Event Ticketing</h1>
-      <p>The server is running.</p>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="Gather home">Gather<span>.</span></a>
+      <p class="header-note">Find your next good day out</p>
+    </header>
+    <main class="page-shell">
+      <section class="hero" aria-labelledby="page-title">
+        <p class="eyebrow">Good things are happening</p>
+        <h1 id="page-title">Find your next<br>great experience.</h1>
+        <p class="hero-copy">Discover live music, local festivals and ideas worth leaving home for.</p>
+      </section>
+
+      <section class="browse-panel" aria-labelledby="browse-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">The event list</p>
+            <h2 id="browse-title">Explore events</h2>
+          </div>
+        </div>
+        <form id="filters" class="filter-form">
+          <div class="field field-search">
+            <label for="search">Search events</label>
+            <input id="search" name="q" type="search" placeholder="Artist, event or venue">
+          </div>
+          <div class="field">
+            <label for="city">City</label>
+            <input id="city" name="city" type="text" placeholder="Any city">
+          </div>
+          <div class="field">
+            <label for="max-price">Maximum price (cents)</label>
+            <input id="max-price" name="maxPriceCents" type="number" min="0" step="1" placeholder="No limit">
+          </div>
+          <div class="field">
+            <label for="sort">Sort by</label>
+            <select id="sort" name="sort">
+              <option value="date">Soonest</option>
+              <option value="price">Lowest price</option>
+              <option value="availability">Most tickets</option>
+            </select>
+          </div>
+          <button class="button button-dark filter-button" type="submit">Find events</button>
+        </form>
+
+        <p id="results-status" class="results-status" role="status" aria-live="polite"></p>
+        <div id="event-list" class="event-grid" aria-live="polite"></div>
+      </section>
     </main>
+    <footer class="site-footer">
+      <span>Gather<span class="brand-dot">.</span></span>
+      <span>Made for moments worth remembering.</span>
+    </footer>
   </body>
 </html>
