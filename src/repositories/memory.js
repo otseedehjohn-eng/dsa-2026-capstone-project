@@ -27,6 +27,22 @@ export function createMemoryRepository() {
       return events.get(eventId)?.tiers.get(tierId) ?? null;
     },
 
+    async reserveTierSeats(eventId, tierId, quantity) {
+      const tier = events.get(eventId)?.tiers.get(tierId);
+      if (!tier || tier.sold + quantity > tier.capacity) return false;
+      tier.sold += quantity;
+      tier.seatsLeft = tier.capacity - tier.sold;
+      return true;
+    },
+
+    async releaseTierSeats(eventId, tierId, quantity) {
+      const tier = events.get(eventId)?.tiers.get(tierId);
+      if (!tier || tier.sold < quantity) return false;
+      tier.sold -= quantity;
+      tier.seatsLeft = tier.capacity - tier.sold;
+      return true;
+    },
+
     async saveBooking(booking) {
       bookings.set(booking.reference, booking);
       return booking;

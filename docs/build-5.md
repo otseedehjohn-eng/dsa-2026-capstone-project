@@ -11,6 +11,10 @@
 - A test proves it, and fails if the fix is removed.
 - Data survives a server restart.
 
+Run `npm run seed` to add the sample event once, `npm start` to start the API,
+and `npm run oversell` to run the concurrent last-seat demonstration. The
+server database is stored at `data/ticketing.sqlite`.
+
 ## User stories in this build
 
 ### S08: As an attendee, I want to be certain the last ticket is sold to only one person, so that nobody turns up to a full event
@@ -74,6 +78,8 @@ not in JavaScript.
 
 List every file you changed and anything you were unsure about.
 ```
+
+An in-process lock only coordinates callers sharing that one process, so another server process can still reserve the same seat. A separate availability read and later write lets concurrent requests all pass the check before any write is visible, while the conditional `UPDATE` makes the capacity check and reservation one database operation.
 
 ## Definition of done
 

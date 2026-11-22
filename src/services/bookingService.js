@@ -13,9 +13,15 @@ function requireUserId(userId) {
   return userId.trim();
 }
 
-function storeFor(event, bookings = []) {
+function storeFor(event, bookings = [], detachEvent = false) {
   const store = createStore();
-  store.events.set(event.id, event);
+  const storedEvent = detachEvent
+    ? {
+      ...event,
+      tiers: new Map([...event.tiers].map(([id, tier]) => [id, { ...tier }])),
+    }
+    : event;
+  store.events.set(storedEvent.id, storedEvent);
   for (const booking of bookings) store.bookingsByReference.set(booking.reference, booking);
   return store;
 }
@@ -35,10 +41,12 @@ export function createBookingService(repository, paymentGateway) {
         throw new DomainError('NOT_FOUND', `Ticket tier "${tierId}" was not found.`);
       }
 
-      const store = storeFor(event, await repository.listBookings());
+      const store = storeFor(event, await repository.listBookings(), true);
       const booking = bookDomainTickets(store, eventId, tierId, attendeeName, quantity);
+      if (!await repository.reserveTierSeats(eventId, tierId, quantity)) {
+        throw new DomainError('SOLD_OUT', 'There are not enough seats left in this tier.');
+      }
       booking.userId = ownerId;
-      await repository.saveEvent(event);
       return repository.saveBooking(booking);
     },
 
@@ -85,10 +93,12 @@ export function createBookingService(repository, paymentGateway) {
         throw new DomainError('NOT_FOUND', `Event "${booking.eventId}" was not found.`);
       }
       const cancelledBooking = cancelDomainBooking(
-        storeFor(event, await repository.listBookings()),
+        storeFor(event, await repository.listBookings(), true),
         reference,
       );
-      await repository.saveEvent(event);
+      if (!await repository.releaseTierSeats(booking.eventId, booking.tierId, booking.quantity)) {
+        throw new DomainError('INVALID_STATE', 'The booking seats could not be released.');
+      }
       await repository.saveBooking(cancelledBooking);
       return cancelledBooking;
     },

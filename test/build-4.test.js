@@ -198,6 +198,8 @@ test('real API supports event creation, search, booking, payment, and cancellati
   );
   assert.equal(cancelledResponse.status, 200);
   assert.equal((await cancelledResponse.json()).status, 'cancelled');
+  const availableAfterCancellation = await request(baseUrl, '/api/events?onlyAvailable=true');
+  assert.deepEqual((await availableAfterCancellation.json()).map(({ id }) => id), [event.id]);
 
   await assertError(
     await request(baseUrl, `/api/bookings/${secondBooking.reference}/pay`, {
