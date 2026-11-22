@@ -17,6 +17,8 @@
 Check-in requires a staff account and the event id selected by staff. This
 build does not persist staff-to-event assignments.
 
+See [debugging.md](debugging.md) for a Build 9 rate-limit test investigation.
+
 ## User stories in this build
 
 ### S14: As a staff, I want to scan a ticket's QR code at the door, so that I can admit the right people
