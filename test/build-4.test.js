@@ -246,3 +246,32 @@ test('API maps invalid JSON, validation failures, and unknown routes to JSON err
   );
   await assertError(await request(baseUrl, '/api/not-a-route'), 404, 'NOT_FOUND');
 });
+
+test('event service persists publish and unpublish through the repository', async () => {
+  const repository = createMemoryRepository();
+  let saveEventCount = 0;
+  const saveEvent = repository.saveEvent;
+  repository.saveEvent = async (event) => {
+    saveEventCount += 1;
+    return saveEvent(event);
+  };
+  const eventService = createEventService(repository);
+  const event = await eventService.create('organizer-1', {
+    title: 'Persistence Test',
+    city: 'Lagos',
+    venue: 'Hall',
+    date: '2026-12-05',
+  });
+  await eventService.addTier('organizer-1', event.id, {
+    name: 'General',
+    priceCents: 1000,
+    capacity: 2,
+  });
+
+  await eventService.publish('organizer-1', event.id);
+  assert.equal((await repository.findEvent(event.id)).published, true);
+
+  await eventService.unpublish('organizer-1', event.id);
+  assert.equal((await repository.findEvent(event.id)).published, false);
+  assert.equal(saveEventCount, 3);
+});

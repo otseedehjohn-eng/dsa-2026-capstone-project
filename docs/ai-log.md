@@ -18,6 +18,6 @@ Every time you give an AI tool a significant prompt, add an entry. Three lines e
 - **What was wrong (or "nothing"):** S04's criteria section was blank despite the prompt asking for tests against criteria written in class. I documented criteria matching the requested publish/unpublish behavior and the required no-tier `INVALID_STATE` rule. No implementation rule remained unclear.
 
 ### Prompt 2:
-- **What I asked:**
-- **What came back:**
-- **What was wrong (or "nothing"):**
+- **What I asked:** Complete Build 4 and verify the working REST API end to end.
+- **What came back:** The existing Build 4 implementation already passed the API suite and build 2/3 suites.
+- **What was wrong (or "nothing"):** Publish and unpublish changed their domain event objects without explicitly calling `repository.saveEvent`; I added repository persistence calls so the service remains correct if a repository uses copy-on-read storage. No prompt rule was unclear.

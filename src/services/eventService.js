@@ -76,7 +76,9 @@ export function createEventService(repository) {
       if (event.organizerId !== requireUserId(userId)) {
         throw new DomainError('FORBIDDEN', 'Only the event organizer can publish this event.');
       }
-      return serializeEvent(publishDomainEvent(storeWithEvent(event), eventId));
+      const published = publishDomainEvent(storeWithEvent(event), eventId);
+      await repository.saveEvent(published);
+      return serializeEvent(published);
     },
 
     async unpublish(userId, eventId) {
@@ -87,7 +89,9 @@ export function createEventService(repository) {
       if (event.organizerId !== requireUserId(userId)) {
         throw new DomainError('FORBIDDEN', 'Only the event organizer can unpublish this event.');
       }
-      return serializeEvent(unpublishDomainEvent(storeWithEvent(event), eventId));
+      const unpublished = unpublishDomainEvent(storeWithEvent(event), eventId);
+      await repository.saveEvent(unpublished);
+      return serializeEvent(unpublished);
     },
 
     async search(criteria, sortBy = 'date') {
